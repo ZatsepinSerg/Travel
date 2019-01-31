@@ -2,8 +2,9 @@
 
 namespace App\Controllers;
 
-
+use App\Helpers\RegExpHelper;
 use App\Models\Curl;
+use Exception;
 
 class CrawlerController
 {
@@ -18,39 +19,82 @@ class CrawlerController
         $this->url = $url;
     }
 
-    public function index()
+    public function run()
     {
-        $linksList = $this->getLinksBySite();
+        $urlList = $this->getUrlsBySite();
 
-         var_dump($linksList);
+        if (empty($urlList)) {
+            throw new Exception('var $urlList  empty');
+        }
+
+        $pagesInfo = $this->getInfoPage($urlList);
+
+        if (empty($pagesInfo)) {
+            throw new Exception('var $pagesInfo  empty');
+        }
+
+        $this->sortPagesInfoArray($pagesInfo);
 
     }
 
+    protected function getInfoPage(array $urlList): array
+    {
+        $pagesInfo = [];
+
+        foreach ($urlList AS $url) {
+            $pageInfo = Curl::connect($url);
+
+            $countImg = RegExpHelper::getCountImageByPage($pageInfo['page']);
+
+            $time = $pageInfo['info']['total_time'];
+            $dept = count(explode("/", $url));
+
+            $pagesInfo[] = [
+                'url' => $url,
+                'load_time' => $time,
+                'count_img' => $countImg,
+                'dept' => $dept,
+            ];
+        }
+
+        return $pagesInfo;
+    }
+
+    /**
+     * @param array $pagesInfo
+     * @return array
+     */
+    protected function sortPagesInfoArray(array $pagesInfo): array
+    {
+        $sort = [];
+        foreach ($pagesInfo as $key => $row)
+            $sort[$key] = $row['count_img'];
+
+        array_multisort($sort, SORT_DESC, $pagesInfo);
+
+        return $pagesInfo;
+    }
 
     /**
      * @return array
      */
-    protected function getLinksBySite(): array
+    protected function getUrlsBySite(): array
     {
-        $page = Curl::connect($this->url);
+        $pageInfo = Curl::connect($this->url);
 
-        preg_match_all('/<a\shref="(http|https):\/\/(' . $this->url . '\/.+?)"/i', $page, $urlsListRaw);
-
-        $urls = array_unique($urlsListRaw[2]);
+        $urls = RegExpHelper::createUrlsList($this->url, $pageInfo['page']);
         $allUrl = [];
 
-        foreach ($urls AS $link) {
-            $page = Curl::connect($link);
+        foreach ($urls AS $url) {
+            $pageInfo = Curl::connect($url);
 
-            preg_match_all('/<a\shref="(http|https):\/\/(' . $this->url . '\/.+?)"/i', $page, $linksListRaw);
+            $uniqueUrlsByPage = RegExpHelper::createUrlsList($this->url, $pageInfo['page']);
 
-            $allUrl = array_merge($allUrl, array_unique($urlsListRaw[2]));
+            $allUrl = array_merge($allUrl, $uniqueUrlsByPage);
         }
 
         $urls = array_unique(array_merge($urls, $allUrl));
 
         return $urls;
     }
-
-
 }
