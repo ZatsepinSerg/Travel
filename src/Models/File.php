@@ -33,7 +33,7 @@ class File
      */
     protected function fileCreate(string $url)
     {
-        $filePath = 'src/Public/' . $url . "." . date('d.m.Y') . ".html";
+        $filePath = '../src/Public/' . $url . "." . date('d.m.Y') . ".html";
 
         if (file_exists($filePath))
             unlink($filePath);

@@ -13,7 +13,7 @@ use Exception;
 class HTMLHelper
 {
     const  TEMPLATE = "[TABLE_BODY]";
-    const  TEMPLATE_PATH = 'src/Public/template.html';
+    const  TEMPLATE_PATH = '../src/Public/template.html';
 
     /**
      * @param array $pagesInfo
@@ -34,12 +34,13 @@ class HTMLHelper
         return $table;
     }
 
+
     /**
-     * @param $tableBody
+     * @param string $tableBody
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
-    public static function createPageHTML($tableBody): string
+    public static function createPageHTML(string $tableBody): string
     {
         $template = file_get_contents(self::TEMPLATE_PATH);
 
