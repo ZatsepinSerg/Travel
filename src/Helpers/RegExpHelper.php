@@ -14,7 +14,7 @@ class RegExpHelper
      * @param string $page
      * @return array
      */
-    public static function createUrlsList(string $url, string $page): array
+    public static function getUrlsListByPage(string $url, string $page): array
     {
         preg_match_all('/<a\shref="(http|https):\/\/(' . $url . '[a-zA-z0-9-\/_]+?)"/i',
             $page, $urlsListRaw);

@@ -16,6 +16,8 @@ class HTMLHelper
     const  TEMPLATE_PATH = '../src/Public/template.html';
 
     /**
+     * Generate body table for insert in template
+     *
      * @param array $pagesInfo
      * @return string
      */
@@ -34,8 +36,9 @@ class HTMLHelper
         return $table;
     }
 
-
     /**
+     * Inserting  body tables in template
+     *
      * @param string $tableBody
      * @return string
      * @throws Exception

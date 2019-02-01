@@ -33,7 +33,7 @@ class CrawlerController
      */
     public function run()
     {
-        $urlList = $this->pageObj->getUrlsOnPageBySite($this->url);
+        $urlList = $this->pageObj->getUrlsOnPagesBySite($this->url);
 
         if (empty($urlList)) {
             throw new Exception('var $urlList  empty');
@@ -45,10 +45,12 @@ class CrawlerController
             throw new Exception('var $pagesInfo  empty');
         }
 
-         $this->fileObj->createFileReport($pagesInfo,$this->url);
+         $this->fileObj->processCreateFileReportHTML($pagesInfo,$this->url);
     }
 
     /**
+     * Validate param url
+     *
      * @param string $url
      * @throws Exception
      */

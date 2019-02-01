@@ -15,20 +15,22 @@ class Page
 {
 
     /**
+     * Get urls by Web Site
+     *
      * @param string $siteUrl
      * @return array
      */
-    public function getUrlsOnPageBySite(string $siteUrl): array
+    public function getUrlsOnPagesBySite(string $siteUrl): array
     {
         $pageInfo = Curl::connect($siteUrl);
 
-        $urls = RegExpHelper::createUrlsList($siteUrl, $pageInfo['page']);
+        $urls = RegExpHelper::getUrlsListByPage($siteUrl, $pageInfo['page']);
         $allUrl = [];
 
         foreach ($urls AS $url) {
             $pageInfo = Curl::connect($url);
 
-            $uniqueUrlsByPage = RegExpHelper::createUrlsList($siteUrl, $pageInfo['page']);
+            $uniqueUrlsByPage = RegExpHelper::getUrlsListByPage($siteUrl, $pageInfo['page']);
 
             $allUrl = array_merge($allUrl, $uniqueUrlsByPage);
         }
@@ -40,6 +42,8 @@ class Page
 
 
     /**
+     * Get info pages by site
+     *
      * @param array $urlList
      * @return array
      * @throws Exception

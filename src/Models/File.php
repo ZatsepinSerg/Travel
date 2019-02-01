@@ -14,11 +14,13 @@ use App\Helpers\HTMLHelper;
 class File
 {
     /**
+     * Process  create and seed HTML file report
+     *
      * @param array $pagesInfo
      * @param string $url
      * @throws \Exception
      */
-    public function createFileReport(array $pagesInfo, string $url)
+    public function processCreateFileReportHTML(array $pagesInfo, string $url)
     {
         $fp = $this->fileCreate($url);
         $this->fileWrite($fp, $pagesInfo);
@@ -27,6 +29,8 @@ class File
     }
 
     /**
+     * Create empty HTML file
+     *
      * @param string $url
      * @return bool|resource
      * @throws \Exception
@@ -47,6 +51,8 @@ class File
     }
 
     /**
+     * Generate and insert data in template
+     *
      * @param $fp
      * @param array $pagesInfo
      * @throws \Exception
