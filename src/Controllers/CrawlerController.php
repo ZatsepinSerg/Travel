@@ -2,99 +2,70 @@
 
 namespace App\Controllers;
 
-use App\Helpers\RegExpHelper;
-use App\Models\Curl;
+use App\Models\File;
+use App\Models\Page;
 use Exception;
 
 class CrawlerController
 {
-    public $url;
+    protected $url;
+    protected $pageObj;
+    protected $fileObj;
+    protected $startRunTime;
+
 
     /**
      * CrawlerController constructor.
      * @param string $url
+     * @throws Exception
      */
     public function __construct(string $url)
     {
+        $this->startRunTime = microtime(true);
+        $this->validatorUrl($url);
         $this->url = $url;
+        $this->pageObj = new Page();
+        $this->fileObj = new File();
     }
 
+    /**
+     * @throws Exception
+     */
     public function run()
     {
-        $urlList = $this->getUrlsBySite();
+        $urlList = $this->pageObj->getUrlsOnPageBySite($this->url);
 
         if (empty($urlList)) {
             throw new Exception('var $urlList  empty');
         }
 
-        $pagesInfo = $this->getInfoPage($urlList);
+        $pagesInfo = $this->pageObj->getInfoPage($urlList);
 
         if (empty($pagesInfo)) {
             throw new Exception('var $pagesInfo  empty');
         }
 
-        $this->sortPagesInfoArray($pagesInfo);
-
-    }
-
-    protected function getInfoPage(array $urlList): array
-    {
-        $pagesInfo = [];
-
-        foreach ($urlList AS $url) {
-            $pageInfo = Curl::connect($url);
-
-            $countImg = RegExpHelper::getCountImageByPage($pageInfo['page']);
-
-            $time = $pageInfo['info']['total_time'];
-            $dept = count(explode("/", $url));
-
-            $pagesInfo[] = [
-                'url' => $url,
-                'load_time' => $time,
-                'count_img' => $countImg,
-                'dept' => $dept,
-            ];
-        }
-
-        return $pagesInfo;
+         $this->fileObj->createFileReport($pagesInfo,$this->url);
     }
 
     /**
-     * @param array $pagesInfo
-     * @return array
+     * @param string $url
+     * @throws Exception
      */
-    protected function sortPagesInfoArray(array $pagesInfo): array
+    protected function validatorUrl(string $url)
     {
-        $sort = [];
-        foreach ($pagesInfo as $key => $row)
-            $sort[$key] = $row['count_img'];
+        $reg_exp = "/^[a-zA-Z0-9\.\-\_]+(\.[a-zA-Z]{2,3})+(\/[a-zA-Z0-9\_\-\s\.\/\?\%\#\&\=]*)?$/";
 
-        array_multisort($sort, SORT_DESC, $pagesInfo);
-
-        return $pagesInfo;
+        if (preg_match($reg_exp, $url) == false) {
+            throw new Exception("URL is not valid format");
+        }
     }
 
-    /**
-     * @return array
-     */
-    protected function getUrlsBySite(): array
+    public function __destruct()
     {
-        $pageInfo = Curl::connect($this->url);
-
-        $urls = RegExpHelper::createUrlsList($this->url, $pageInfo['page']);
-        $allUrl = [];
-
-        foreach ($urls AS $url) {
-            $pageInfo = Curl::connect($url);
-
-            $uniqueUrlsByPage = RegExpHelper::createUrlsList($this->url, $pageInfo['page']);
-
-            $allUrl = array_merge($allUrl, $uniqueUrlsByPage);
-        }
-
-        $urls = array_unique(array_merge($urls, $allUrl));
-
-        return $urls;
+       print  "Execute time script\n";
+       print  round(microtime(true) - $this->startRunTime,2);
+       print  "(Sec)\n";
+       print ' END';
     }
 }
