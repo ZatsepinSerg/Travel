@@ -8,26 +8,27 @@
 
 namespace App\Models;
 
-
 use App\Helpers\RegExpHelper;
+use Exception;
 
 class Page
 {
 
     /**
+     * @param string $siteUrl
      * @return array
      */
-    public function getUrlsOnPageBySite(): array
+    public function getUrlsOnPageBySite(string $siteUrl): array
     {
-        $pageInfo = Curl::connect($this->url);
+        $pageInfo = Curl::connect($siteUrl);
 
-        $urls = RegExpHelper::createUrlsList($this->url, $pageInfo['page']);
+        $urls = RegExpHelper::createUrlsList($siteUrl, $pageInfo['page']);
         $allUrl = [];
 
         foreach ($urls AS $url) {
             $pageInfo = Curl::connect($url);
 
-            $uniqueUrlsByPage = RegExpHelper::createUrlsList($this->url, $pageInfo['page']);
+            $uniqueUrlsByPage = RegExpHelper::createUrlsList($siteUrl, $pageInfo['page']);
 
             $allUrl = array_merge($allUrl, $uniqueUrlsByPage);
         }
@@ -37,6 +38,12 @@ class Page
         return $urls;
     }
 
+
+    /**
+     * @param array $urlList
+     * @return array
+     * @throws Exception
+     */
     public function getInfoPage(array $urlList): array
     {
         $pagesInfo = [];
